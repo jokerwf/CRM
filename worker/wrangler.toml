@@ -1,0 +1,34 @@
+name = "crm-worker"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── Cron Trigger — SLA monitor (every 1 minute) ─────────────────────────────
+[triggers]
+crons = ["* * * * *"]
+
+# ─── Cloudflare R2 — media storage ───────────────────────────────────────────
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "crm-media"
+
+# ─── Environment variables (non-secret) ──────────────────────────────────────
+[vars]
+ENVIRONMENT = "development"
+
+# ─── Secrets (set via: wrangler secret put <KEY>) ────────────────────────────
+# SUPABASE_URL
+# SUPABASE_SERVICE_ROLE_KEY
+# META_VERIFY_TOKEN
+# EVOLUTION_API_URL
+# EVOLUTION_API_KEY
+# JWT_SECRET
+
+# ─── Development overrides ───────────────────────────────────────────────────
+[env.production]
+name = "crm-worker-prod"
+vars = { ENVIRONMENT = "production" }
+
+[[env.production.r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "crm-media-prod"
