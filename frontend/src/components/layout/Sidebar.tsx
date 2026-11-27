@@ -6,9 +6,6 @@ import { createClient } from '@/lib/supabase'
 
 const nav = [
   { href: '/tickets', label: 'Atendimentos', icon: '💬' },
-  { href: '/contacts', label: 'Contatos',     icon: '👤' },
-  { href: '/groups',  label: 'Grupos',        icon: '👥' },
-  { href: '/reports', label: 'Relatórios',    icon: '📊' },
 ]
 
 export function Sidebar() {
