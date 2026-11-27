@@ -41,15 +41,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ─── Helper: JWT tenant claim ─────────────────────────────────────────────────
--- The Worker sets tenant_id as a custom claim in the Supabase JWT.
--- Frontend reads use this function; Worker uses service_role (bypasses RLS).
+-- Lê o custom claim tenant_id do JWT (injetado pelo Worker ao autenticar).
+-- Movido para schema public — Supabase não permite CREATE em auth.
 
-CREATE OR REPLACE FUNCTION auth.tenant_id()
+CREATE OR REPLACE FUNCTION public.get_tenant_id()
 RETURNS TEXT AS $$
-  SELECT COALESCE(
-    (current_setting('request.jwt.claims', TRUE)::JSONB) ->> 'tenant_id',
-    ''
-  );
+  SELECT COALESCE(auth.jwt() ->> 'tenant_id', '');
 $$ LANGUAGE SQL STABLE SECURITY DEFINER;
 
 -- =============================================================================
@@ -356,56 +353,56 @@ ALTER TABLE satisfaction_surveys ENABLE ROW LEVEL SECURITY;
 
 -- tenants: cada usuário vê apenas o seu tenant
 CREATE POLICY "tenants_isolation" ON tenants
-  FOR ALL USING (id = auth.tenant_id());
+  FOR ALL USING (id = public.get_tenant_id());
 
 -- users
 CREATE POLICY "users_isolation" ON users
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
 
 -- departments
 CREATE POLICY "departments_isolation" ON departments
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
 
 -- department_users (via join na tenant do department)
 CREATE POLICY "dept_users_isolation" ON department_users
   FOR ALL USING (
     department_id IN (
-      SELECT id FROM departments WHERE tenant_id = auth.tenant_id()
+      SELECT id FROM departments WHERE tenant_id = public.get_tenant_id()
     )
   );
 
 -- channels
 CREATE POLICY "channels_isolation" ON channels
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
 
 -- contacts
 CREATE POLICY "contacts_isolation" ON contacts
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
 
 -- groups
 CREATE POLICY "groups_isolation" ON groups
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
 
 -- group_participants (via join no group do tenant)
 CREATE POLICY "group_participants_isolation" ON group_participants
   FOR ALL USING (
     group_id IN (
-      SELECT id FROM groups WHERE tenant_id = auth.tenant_id()
+      SELECT id FROM groups WHERE tenant_id = public.get_tenant_id()
     )
   );
 
 -- sla_policies
 CREATE POLICY "sla_policies_isolation" ON sla_policies
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
 
 -- tickets
 CREATE POLICY "tickets_isolation" ON tickets
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
 
 -- messages
 CREATE POLICY "messages_isolation" ON messages
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
 
 -- satisfaction_surveys
 CREATE POLICY "surveys_isolation" ON satisfaction_surveys
-  FOR ALL USING (tenant_id = auth.tenant_id());
+  FOR ALL USING (tenant_id = public.get_tenant_id());
