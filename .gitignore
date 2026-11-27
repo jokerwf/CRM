@@ -12,11 +12,11 @@ out/
 .wrangler/
 worker/dist/
 
-# Environment variables — NUNCA commitar
-.env
+# Environment variables — NUNCA commitar segredos
 .env.local
 .env.*.local
 .dev.vars
+# .env.production é permitido (só contém NEXT_PUBLIC_ vars — sem segredos)
 
 # OS
 .DS_Store
