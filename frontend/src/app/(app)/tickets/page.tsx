@@ -1,5 +1,7 @@
 'use client'
 
+export const runtime = 'edge'
+
 import { useState } from 'react'
 import { useRealtimeTickets } from '@/hooks/useRealtimeTickets'
 import { TicketCard } from '@/components/tickets/TicketCard'
